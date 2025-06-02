@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Snackaroo</title>
+<style>
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #f0c090;
+    color: #fff;
+  }
+  /* Overlay for portrait mode */
+  #orientation-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #a65a3a;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    padding-top: 40vh;
+    z-index: 9999;
+  }
+  /* Hide main content in portrait */
+  .portrait #main-content {
+    display: none;
+  }
+  /* Show overlay in portrait */
+  .portrait #orientation-overlay {
+    display: block;
+  }
+  /* Header */
+  header {
+    background-color: #a65a3a;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #d9b59a;
+  }
+  header .logo {
+    width: 40px;
+    height: 40px;
+    fill: #fff;
+  }
+  header .title {
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 1;
+  }
+  header .tagline {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 4px;
+    color: #f0d9c0;
+  }
+  /* Large content area */
+  .content-area {
+    background-color: #eee;
+    margin: 40px 30px 20px 30px;
+    border-radius: 15px;
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Slideshow slides */
+  .slide {
+    display: none;
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .slide.active {
+    display: block;
+  }
+  .slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px;
+  }
+  .slide .overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 12px;
+    color: #fff;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+  }
+  .slide .product-name {
+    font-weight: bold;
+    font-size: 18px;
+    margin: 0 0 4px 0;
+  }
+  .slide .product-desc {
+    font-size: 14px;
+    margin: 0;
+    opacity: 0.8;
+  }
+  /* Navigation buttons */
+  .prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+    color: #333;
+    font-weight: bold;
+    font-size: 24px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.7);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+    z-index: 10;
+  }
+  .prev:hover, .next:hover {
+    background-color: rgba(255,255,255,1);
+  }
+  .prev {
+    left: 10px;
+  }
+  .next {
+    right: 10px;
+  }
+  /* Products section */
+  .products-section {
+    background-color: #f0b87a;
+    padding: 30px 30px 40px 30px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: nowrap;
+  }
+  .product-card {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .product-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .product-overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 12px;
+    color: #fff;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+  }
+  .product-name {
+    font-weight: bold;
+    font-size: 14px;
+    margin: 0 0 4px 0;
+  }
+  .product-desc {
+    font-size: 11px;
+    margin: 0;
+    opacity: 0.8;
+  }
+  /* Button */
+  .order-button {
+    display: block;
+    margin: 30px auto 0 auto;
+    background-color: #a65a3a;
+    border: none;
+    border-radius: 15px;
+    padding: 12px 40px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    width: 200px;
+    text-align: center;
+  }
+  .order-button:hover {
+    background-color: #8a4a2d;
+  }
+</style>
+</head>
+<body id="main-content">
+<div id="orientation-overlay">Silahkan miringkan hp kamu</div>
+
+<div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(255,255,255,0.8); z-index:9999; justify-content:center; align-items:center;">
+  <video autoplay muted loop style="max-width: 150px; max-height: 150px;">
+    <source src="{{ url_for('static', filename='animasi_loading.mp4') }}" type="video/mp4" />
+  </video>
+</div>
+
+<header>
+  <svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <path d="M32 2C15 2 2 15 2 32s13 30 30 30 30-13 30-30S49 2 32 2zm0 56c-14.3 0-26-11.7-26-26S17.7 6 32 6s26 11.7 26 26-11.7 26-26 26z" fill="#fff"/>
+    <path d="M20 24c0-4 8-4 8 0 0 4-8 4-8 0zm24 0c0-4-8-4-8 0 0 4 8 4 8 0zM32 38c-6 0-10 3-10 7v3h20v-3c0-4-4-7-10-7z" fill="#fff"/>
+  </svg>
+  <div>
+    <img src="" alt=""><div class="title">Snackaroo</div>
+    <div class="tagline">One bite One smile</div>
+  </div>
+</header>
+
+<div class="content-area">
+  <!-- Customizable slideshow -->
+  <div class="slide active">
+    <img src="/static/Slideshow--1.png" alt="Custom Slide 1" />
+    <div class="overlay">
+      <p class="product-name">Snackaroo Harga</p>
+      <p class="product-desc">Silahkan dilihat dulu :)</p>
+    </div>
+  </div>
+  <div class="slide">
+    <img src="/static/your-custom-image2.jpg" alt="Custom Slide 2" />
+    <div class="overlay">
+      <p class="product-name">Custom Title 2</p>
+      <p class="product-desc">Custom description 2</p>
+    </div>
+  </div>
+  <div class="slide">
+    <img src="/static/your-custom-image3.jpg" alt="Custom Slide 3" />
+    <div class="overlay">
+      <p class="product-name">Custom Title 3</p>
+      <p class="product-desc">Custom description 3</p>
+    </div>
+  </div>
+  <div class="slide">
+    <img src="/static/your-custom-image4.jpg" alt="Custom Slide 4" />
+    <div class="overlay">
+      <p class="product-name">Custom Title 4</p>
+      <p class="product-desc">Custom description 4</p>
+    </div>
+  </div>
+  <div class="slide">
+    <img src="/static/your-custom-image5.jpg" alt="Custom Slide 5" />
+    <div class="overlay">
+      <p class="product-name">Custom Title 5</p>
+      <p class="product-desc">Custom description 5</p>
+    </div>
+  </div>
+
+  <div class="prev">&#10094;</div>
+  <div class="next">&#10095;</div>
+</div>
+
+<section class="products-section">
+  <div class="product-card">
+    <img src="/static/Keripik kaca.jpeg" alt="Keripik Kaca" />
+    <div class="product-overlay">
+      <p class="product-name">Keripik Kaca</p>
+      <p class="product-desc">Pedas daun jeruk</p>
+    </div>
+  </div>
+  <div class="product-card">
+    <img src="/static/Basreng.webp" alt="Basreng" />
+    <div class="product-overlay">
+      <p class="product-name">Basreng</p>
+      <p class="product-desc">Pedas daun jeruk</p>
+    </div>
+  </div>
+  <div class="product-card">
+    <img src="/static/Makaroni.jpg" alt="Makaroni" />
+    <div class="product-overlay">
+      <p class="product-name">Makaroni</p>
+      <p class="product-desc">Pedas daun jeruk</p>
+    </div>
+  </div>
+  <div class="product-card">
+    <img src="/static/Keripik Singkong.png" alt="Keripik Singkong" />
+    <div class="product-overlay">
+      <p class="product-name">Keripik Singkong</p>
+      <p class="product-desc">Balado</p>
+    </div>
+  </div>
+</section>
+
+<form action="/order" method="get" style="text-align:center; margin-top: 30px;">
+  <button class="order-button" type="submit">Pesan Sekarang</button>
+</form>
+<script>
+  const loadingOverlay = document.getElementById("loading-overlay");
+
+  // Tangani klik semua <a>
+  document.querySelectorAll('a[href]').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (
+        href &&
+        href !== "#" &&
+        !href.startsWith('javascript') &&
+        !this.hasAttribute('target') // jangan ganggu link yg buka tab baru
+      ) {
+        e.preventDefault();
+        loadingOverlay.style.display = "flex";
+        setTimeout(() => {
+          window.location.href = href;
+        }, 2000);
+      }
+    });
+  });
+
+  // Tangani submit semua form
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      loadingOverlay.style.display = "flex";
+      setTimeout(() => {
+        form.submit();
+      }, 2000);
+    });
+  });
+
+  // Hilangkan loading saat kembali dari tombol back/forward
+  window.onpageshow = function(event) {
+    loadingOverlay.style.display = "none";
+  };
+</script>
+  <script>
+    const slides = document.querySelectorAll('.content-area .slide');
+    const prevBtn = document.querySelector('.content-area .prev');
+    const nextBtn = document.querySelector('.content-area .next');
+    let currentIndex = 0;
+    let slideInterval;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+      });
+    }
+
+    function startSlideShow() {
+      slideInterval = setInterval(() => {
+        currentIndex = (currentIndex + 1) % slides.length;
+        showSlide(currentIndex);
+      }, 5000);
+    }
+
+    function resetSlideShow() {
+      clearInterval(slideInterval);
+      startSlideShow();
+    }
+
+    prevBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+      showSlide(currentIndex);
+      resetSlideShow();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % slides.length;
+      showSlide(currentIndex);
+      resetSlideShow();
+    });
+
+    // Orientation detection and toggle
+    function checkOrientation() {
+      if(window.matchMedia("(orientation: portrait)").matches) {
+        document.body.classList.add('portrait');
+        document.body.classList.add('portrait');
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Biar nggak bisa scroll
+      } else {
+        document.body.classList.remove('portrait');
+        overlay.style.display = 'none';
+        document.body.style.overflow = ''; // Scroll kembali normal
+      }
+    }
+
+    window.addEventListener('load', checkOrientation);
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+
+    // Show loading animation on page navigation
+    function showLoading() {
+      const loadingOverlay = document.getElementById('loading-overlay');
+      if (loadingOverlay) {
+        loadingOverlay.style.display = 'flex';
+      }
+    }
+  </script>
+
+</body>
+</html>

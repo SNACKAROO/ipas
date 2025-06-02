@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Snackaroo</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #f0c090;
+    color: #000;
+    font-size: 16px;
+  }
+  /* Overlay for portrait mode */
+  #orientation-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #a65a3a;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    padding-top: 40vh;
+    z-index: 9999;
+  }
+  /* Hide main content in portrait */
+  .portrait #main-content {
+    display: none;
+  }
+  /* Show overlay in portrait */
+  .portrait #orientation-overlay {
+    display: block;
+  }
+  header {
+    background-color: #a65a3a;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #d9b59a;
+    color: #fff;
+  }
+  header .logo {
+    width: 40px;
+    height: 40px;
+    fill: #fff;
+  }
+  header .title {
+    font-weight: bold;
+    font-size: 24px;
+    line-height: 1;
+  }
+  header .tagline {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 4px;
+    color: #f0d9c0;
+  }
+  .content-area {
+    background-color: white;
+    margin: 40px 30px 40px 30px;
+    border-radius: 15px;
+    padding: 30px 40px;
+    max-width: 700px;
+  }
+  .form-title {
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  hr.dashed {
+    border: none;
+    border-top: 2px dashed #000;
+    margin: 10px 0 20px 0;
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .label-left {
+    font-weight: normal;
+    font-size: 17px;
+  }
+  .note-right {
+    font-size: 11px;
+    font-weight: normal;
+    max-width: 200px;
+    text-align: left;
+    line-height: 1.2;
+  }
+  .button-container {
+    text-align: center;
+    margin-top: 30px;
+  }
+  .order-button {
+    background-color: #a65a3a;
+    border: none;
+    border-radius: 15px;
+    padding: 12px 40px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    width: 220px;
+  }
+  .order-button:hover {
+    background-color: #8a4a2d;
+  }
+</style>
+</head>
+<div id="loading-overlay" style="
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+">
+  <video src="/Static/Animasi Loading.mp4"
+         autoplay loop muted style="width: 100px; height: 100px;"></video>
+</div>
+<script>
+  window.addEventListener('load', function() {
+    const btnWA = document.getElementById('btnWA');
+    if (!btnWA) return;
+
+    btnWA.addEventListener('click', function() {
+      // Ganti nilai-nilai ini dengan data asli dari backend
+      const dateStr = `{{ date_str }}`;
+      const timeStr = `{{ time_str }}`;
+      const kodeUnik = `{{ kode_unik }}`;
+      const nama = `{{ nama }}`;
+      const email = `{{ email }}`;
+      const telepon = `{{ telepon }}`;
+      const produk = `{{ produk }}`;
+      const alamat = `{{ alamat }}`;
+      const pengantaran = `{{ pengantaran }}`;
+      const jumlah = '{{ jumlah }}'
+      const subtotal = `{{ subtotal_formatted }}`;
+      const discount = `{{ discount_formatted }}`;
+      const ongkir = `{{ ongkir_formatted }}`;
+      const totalBayar = `{{ total_harga_diskon_formatted }}`;
+
+      // Membuat pesan yang akan dikirim ke WhatsApp
+      const message = 
+`Struk Pembelian Snackaroo
+Tanggal: ${dateStr} - ${timeStr}
+--------------------------------
+Kode Pemesanan: 
+${kodeUnik}
+--------------------------------
+Nama : ${nama}
+Email : ${email}
+No Telepon : ${telepon}
+Produk : ${produk}
+Alamat : ${alamat}
+Pengantaran : ${pengantaran}
+--------------------------------
+jumlah : ${jumlah}
+Subtotal : ${subtotal}
+Diskon : ${discount}
+Ongkir : ${ongkir}
+Total Bayar : ${totalBayar}
+
+Terima kasih sudah memesan!`;
+
+      // Encode pesan supaya aman untuk URL
+      const encodedMessage = encodeURIComponent(message);
+
+      // Nomor WhatsApp tujuan, ganti sesuai nomormu
+      const waNumber = "628882283674";
+
+      // Buka WhatsApp Web dengan pesan yang sudah di-encode
+      const waUrl = `https://wa.me/628882283674?text=${encodedMessage}`;
+      window.open(waUrl, '_blank');
+    });
+  });
+</script>
+<body>
+<center>
+<div id="orientation-overlay">Silahkan miringkan hp kamu</div>
+
+<div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background-color: rgba(255,255,255,0.8); z-index:9999; justify-content:center; align-items:center;">
+  <video autoplay muted loop style="max-width: 150px; max-height: 150px;">
+    <source src="{{ url_for('static', filename='animasi_loading.mp4') }}" type="video/mp4" />
+  </video>
+</div>
+
+<header>
+  <svg class="logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <path d="M32 2C15 2 2 15 2 32s13 30 30 30 30-13 30-30S49 2 32 2zm0 56c-14.3 0-26-11.7-26-26S17.7 6 32 6s26 11.7 26 26-11.7 26-26 26z" fill="#fff"/>
+    <path d="M20 24c0-4 8-4 8 0 0 4-8 4-8 0zm24 0c0-4-8-4-8 0 0 4 8 4 8 0zM32 38c-6 0-10 3-10 7v3h20v-3c0-4-4-7-10-7z" fill="#fff"/>
+  </svg>
+  <div>
+    <div class="title">Snackaroo</div>
+    <div class="tagline">One bite One smile</div>
+  </div>
+</header>
+<br>
+<div class="content-area">
+  <div class="form-title">Struk Pembelian</div>
+  <div style="text-align:center; font-size: 14px; margin-bottom: 10px;">
+    {{ date_str }}-{{ time_str }}
+  </div>
+  <hr class="dashed" />
+  <div class="row">
+    <div class="label-left">Kode Pemesanan : {{ kode_unik }}</div>
+  </div>
+  <hr class="dashed" />
+  <div class="row">
+    <div class="label-left" style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+      <div style="display: flex; gap: 6px;">
+        <span style="min-width: 100px; text-align: left;">Nama</span>
+        <span style="min-width: 10px; text-align: center;">:</span>
+        <span>{{ nama }}</span>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <span style="min-width: 100px; text-align: left;">Email</span>
+        <span style="min-width: 10px; text-align: center;">:</span>
+        <span>{{ email }}</span>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <span style="min-width: 100px; text-align: left;">No Telepon</span>
+        <span style="min-width: 10px; text-align: center;">:</span>
+        <span>{{ telepon }}</span>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <span style="min-width: 100px; text-align: left;">Produk</span>
+        <span style="min-width: 10px; text-align: center;">:</span>
+        <span>{{ produk }}</span>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <span style="min-width: 100px; text-align: left;">Alamat</span>
+        <span style="min-width: 10px; text-align: center;">:</span>
+        <span>{{ alamat }}</span>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <span style="min-width: 100px; text-align: left;">Pengantaran</span>
+        <span style="min-width: 10px; text-align: center;">:</span>
+        <span>{{ pengantaran }}</span>
+      </div>
+    </div>
+    
+  </div>
+  <hr class="dashed" />
+  <div class="row">
+    <div class="label-left" style="display: flex; gap: 6px;">
+      <span style="min-width: 100px; text-align: left;">Subtotal</span>
+      <span style="min-width: 10px; text-align: center;">:</span>
+      <span>{{ subtotal_formatted }}</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="label-left" style="display: flex; gap: 6px;">
+      <span style="min-width: 100px; text-align: left;">Diskon</span>
+      <span style="min-width: 10px; text-align: center;">:</span>
+      <span>{{ discount_formatted }}</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="label-left" style="display: flex; gap: 6px;">
+      <span style="min-width: 100px; text-align: left;">Ongkir</span>
+      <span style="min-width: 10px; text-align: center;">:</span>
+      <span>{{ ongkir_formatted }}</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="label-left" style="display: flex; gap: 6px;">
+      <span style="min-width: 100px; text-align: left;">Total Bayar</span>
+      <span style="min-width: 10px; text-align: center;">:</span>
+      <span>{{ total_harga_diskon_formatted }}</span>
+    </div>
+  </div>
+  <hr class="dashed" />
+  <div class="button-container">
+    <button id="btnWA" class="order-button" type="button">Hubungi di WhatsApp</button>
+  </div>
+</div>
+</center>
+<script>
+  const loadingOverlay = document.getElementById("loading-overlay");
+
+  // Tangani klik semua <a>
+  document.querySelectorAll('a[href]').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (
+        href &&
+        href !== "#" &&
+        !href.startsWith('javascript') &&
+        !this.hasAttribute('target') // jangan ganggu link yg buka tab baru
+      ) {
+        e.preventDefault();
+        loadingOverlay.style.display = "flex";
+        setTimeout(() => {
+          window.location.href = href;
+        }, 2000);
+      }
+    });
+  });
+
+  // Tangani submit semua form
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      loadingOverlay.style.display = "flex";
+      setTimeout(() => {
+        form.submit();
+      }, 2000);
+    });
+  });
+
+  // Hilangkan loading saat kembali dari tombol back/forward
+  window.onpageshow = function(event) {
+    loadingOverlay.style.display = "none";
+  };
+</script>
+
+<script>
+  // Orientation detection and toggle
+  function checkOrientation() {
+    if(window.matchMedia("(orientation: portrait)").matches) {
+      document.body.classList.add('portrait');
+    } else {
+      document.body.classList.remove('portrait');
+    }
+  }
+
+    window.addEventListener('load', checkOrientation);
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+</script>
+<script>
+  // Show loading animation on page navigation
+  function checkOrientation() {
+      if(window.matchMedia("(orientation: portrait)").matches) {
+        document.body.classList.add('portrait');
+        document.body.classList.add('portrait');
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Biar nggak bisa scroll
+      } else {
+        document.body.classList.remove('portrait');
+        overlay.style.display = 'none';
+        document.body.style.overflow = ''; // Scroll kembali normal
+      }
+    }
+</script>
+</body>
+</html>
